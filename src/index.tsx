@@ -1,12 +1,21 @@
-import React from 'react';
+import React, {createContext} from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import {default as store} from "./mobx";
+
+
+export const Context = createContext({
+    store
+})
+
 
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+      <Context.Provider value={{ store }}>
+          <App />
+      </Context.Provider>
   </React.StrictMode>,
   document.getElementById('root')
 );
