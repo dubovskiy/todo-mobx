@@ -4,8 +4,9 @@ import TodoController from "../controller";
 
 class Todo {
     maxId = -1;
-    todoList = [] as ITask[];
-    todoListHelper = {} as Record<number, ITaskStatus>;
+    todoList:  ITask[] = [];
+    todoListHelper: Record<number, ITaskStatus> = {};
+    error = '';
 
     constructor() {
         TodoController
@@ -71,12 +72,18 @@ class Todo {
 
         TodoController
             .createTodo(todoItem)
-            .then(({success}) => {
-                if (!success) {
-                    this.removeItem(id);
-                }
-                this.setPending(id, false);
+            .catch((e) => {
+                this.removeItem(id);
+                this.setError(e.message);
             })
+            .finally(() => {
+                this.setPending(id, false);
+            });
+    }
+
+    private setError(msg?: string) {
+        this.error = msg || 'Fatal Error';
+        setTimeout(() => this.error = '', 5000);
     }
 
     updateContent(updatedTask: ITask, withUndo:boolean = true) {
@@ -84,28 +91,26 @@ class Todo {
         const task = this.getTask(id);
         if (task) {
             this.saveOldTitle(id);
-            this.setPending(id, true);
             Object.assign(task, updatedTask);
-
-            TodoController
-                .updateTodo(task)
-                .then(({success}) => {
-                    this.setPending(id, false);
-
-                    if (success && withUndo) {
-                        const to = setTimeout(() => {
+            if (withUndo) {
+                const to = setTimeout(() => {
+                    this.setPending(id, true);
+                    TodoController
+                        .updateTodo(task)
+                        .catch((e) => {
+                            const oldTitle = this.getOldTitle(id);
+                            if (oldTitle) {
+                                task.title = oldTitle;
+                            }
+                            this.setError(e.message);
+                        }).finally(() => {
                             this.removeTimeout(id);
                             this.removeOldTitle(id);
-                        }, 5000);
-                        this.saveTimeout(id, to);
-                    } else if (!success) {
-                        const oldTitle = this.getOldTitle(id);
-                        if (oldTitle) {
-                            task.title = oldTitle;
-                        }
-                        console.log('error');
-                    }
-                });
+                            this.setPending(id, false);
+                        });
+                }, 5000);
+                this.saveTimeout(id, to);
+            }
         }
     }
 
@@ -117,11 +122,11 @@ class Todo {
 
             TodoController
                 .updateTodo(task)
-                .then(({success}) => {
-                    if (!success) {
-                        task.done = !task.done;
-                        console.log('error');
-                    }
+                .catch((e) => {
+                    task.done = !task.done;
+                    this.setError(e.message);
+                })
+                .finally(() => {
                     this.setPending(id, false);
                 });
         }
@@ -147,12 +152,11 @@ class Todo {
             .then(({success}) => {
                 if (success) {
                     this.removeItem(id);
-                } else {
-
                 }
-                console.log('error');
-                this.setPending(id, false);
             })
+            .finally(() => {
+                this.setPending(id, false);
+            });
     }
 
     setMaxId(id: number) {

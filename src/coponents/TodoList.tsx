@@ -14,6 +14,7 @@ const TodoList = () => {
     }
 
     return (
+        <>
         <Paper>
             {store.todoFullList.map((todoItem) => (
                 editId === todoItem.id
@@ -31,6 +32,8 @@ const TodoList = () => {
                     />
             ))}
         </Paper>
+        {store.error && <Paper>{store.error}</Paper>}
+            </>
     )
 }
 

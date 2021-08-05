@@ -11,15 +11,9 @@ class TodoController {
                     todos: response.data,
                 };
             }
-            return {
-                success: false,
-                error: 'Something went wrong',
-            };
+            throw new Error('Something went wrong');
         } catch (e) {
-            return {
-                success: false,
-                error: e.response?.data?.message || 'Error',
-            }
+            return Promise.reject(new Error(e));
         }
     }
 
@@ -32,15 +26,10 @@ class TodoController {
                     todos: response.data,
                 };
             }
-            return {
-                success: false,
-                error: 'Something went wrong',
-            };
+
+            throw new Error('Something went wrong');
         } catch (e) {
-            return {
-                success: false,
-                error: e.response?.data?.message || 'Error',
-            }
+            return Promise.reject(new Error(e));
         }
     }
 
@@ -53,15 +42,9 @@ class TodoController {
                     todos: response.data,
                 };
             }
-            return {
-                success: false,
-                error: 'Something went wrong',
-            };
+            throw new Error('Something went wrong');
         } catch (e) {
-            return {
-                success: false,
-                error: e.response?.data?.message || 'Error',
-            }
+            return Promise.reject(new Error(e));
         }
     }
 
@@ -74,15 +57,9 @@ class TodoController {
                     todos: response.data,
                 };
             }
-            return {
-                success: false,
-                error: 'Something went wrong',
-            };
+            throw new Error('Something went wrong');
         } catch (e) {
-            return {
-                success: false,
-                error: e.response?.data?.message || 'Error',
-            }
+            return Promise.reject(new Error(e));
         }
     }
 
