@@ -6,6 +6,7 @@ import HighlightOffIcon from '@material-ui/icons/HighlightOff';
 import {observer} from "mobx-react-lite";
 import classNames from "classnames";
 import {Context} from "../index";
+import Loader from 'react-loader-spinner';
 
 interface IProps{
     item: IFullTask
@@ -31,6 +32,13 @@ const TodoItemView: React.FunctionComponent<IProps> = ({item, onEdit, onRemove, 
             onMouseLeave={() => setHover(false)}
         >
             <div onClick={onDone} className="link-item">
+                {item.isPending && <div className="link-item-loader">
+                    <Loader
+                    type="Puff"
+                    color="#00BFFF"
+                    height={20}
+                    width={20}
+                    /></div>}
                 {item.done ? <s>{item.title}</s> : item.title}
             </div>
             <div className="task-settings">
@@ -46,6 +54,6 @@ const TodoItemView: React.FunctionComponent<IProps> = ({item, onEdit, onRemove, 
             </div>
         </Box>
     )
-}
+};
 
 export default observer(TodoItemView)
