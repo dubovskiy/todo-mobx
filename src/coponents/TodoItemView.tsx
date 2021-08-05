@@ -1,35 +1,41 @@
-import React, {useState} from "react";
-import {ITask} from "../model";
+import React, {useContext, useState} from "react";
+import {IFullTask} from "../model";
 import {Box, Link} from "@material-ui/core";
 import EditIcon from '@material-ui/icons/Edit';
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
+import {observer} from "mobx-react-lite";
+import classNames from "classnames";
+import {Context} from "../index";
 
 interface IProps{
-    item: ITask
+    item: IFullTask
     isUndo: boolean
     onEdit: (id: number) => void
     onRemove: (id: number) => void
-    onUndo: (id: number) => void
-    onDone: (task: ITask) => void
 }
-const TodoItemView: React.FunctionComponent<IProps> = ({item, onEdit, onRemove, onDone, isUndo, onUndo}) => {
+const TodoItemView: React.FunctionComponent<IProps> = ({item, onEdit, onRemove, isUndo}) => {
     const [isHover, setHover] = useState(false);
+    const {store} = useContext(Context)
 
-    const onDoneHandler = () => {
-        onDone({...item, done: !item.done})
+    const onUndo = () => {
+        store.undo(item.id);
+    }
+
+    const onDone = () => {
+        store.updateStatus(item.id);
     }
 
     return (
-        <Box className="task-item"
+        <Box className={classNames('task-item', { 'pending': item.isPending})}
             onMouseEnter={() => setHover(true)}
             onMouseLeave={() => setHover(false)}
         >
-            <div onClick={onDoneHandler} className="link-item">
+            <div onClick={onDone} className="link-item">
                 {item.done ? <s>{item.title}</s> : item.title}
             </div>
             <div className="task-settings">
 
-            {isUndo ? <Link onClick={()=> onUndo(item.id)}>Undo...</Link>
+            {isUndo ? <Link onClick={onUndo}>Undo...</Link>
                 : isHover && (
                 <>
                     <EditIcon onClick={() => onEdit(item.id)} />
@@ -42,4 +48,4 @@ const TodoItemView: React.FunctionComponent<IProps> = ({item, onEdit, onRemove, 
     )
 }
 
-export default TodoItemView
+export default observer(TodoItemView)

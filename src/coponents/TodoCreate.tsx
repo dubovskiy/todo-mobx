@@ -1,7 +1,6 @@
 import {Box, IconButton, Paper, TextField} from "@material-ui/core";
 import AddCircleIcon from "@material-ui/icons/AddCircle";
 import React, {BaseSyntheticEvent, FormEventHandler, useContext, useState} from "react";
-import {INewTask} from "../model";
 import {Context} from "../index";
 import {observer} from "mobx-react-lite";
 
@@ -10,14 +9,19 @@ const TodoCreate = () => {
     const {store} = useContext(Context)
 
 
-    const onChange = (event: any) => setTitle(event.target.value);
+    const onChange = (event: BaseSyntheticEvent) => setTitle(event.target.value);
 
     const onSubmit: FormEventHandler = (e:BaseSyntheticEvent) => {
         e.preventDefault();
-        store.create({
+        if (!title) {
+            return null
+        }
+        const todo = {
             title,
             done: false
-        });
+        };
+
+        store.create(todo);
         setTitle('');
     }
     return (

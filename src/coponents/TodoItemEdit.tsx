@@ -1,23 +1,30 @@
-import React, {BaseSyntheticEvent, useRef, useState} from "react";
+import React, {BaseSyntheticEvent, useContext, useState} from "react";
 import {ITask} from "../model";
-import {Box, Link, TextField} from "@material-ui/core";
-import EditIcon from '@material-ui/icons/Edit';
-import HighlightOffIcon from '@material-ui/icons/HighlightOff';
+import {Box, TextField} from "@material-ui/core";
 import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
 import NotInterestedIcon from '@material-ui/icons/NotInterested';
+import {Context} from "../index";
+import {observer} from "mobx-react-lite";
 
 interface IProps{
     item: ITask,
-    onUpdate: (item: ITask) => void
     onExit: () => void
 }
 
-const TodoItemEdit: React.FunctionComponent<IProps> = ({item, onUpdate, onExit}) => {
+const TodoItemEdit: React.FunctionComponent<IProps> = ({item, onExit}) => {
     const [title, setTitle] = useState(item.title);
     const onChange = (e: BaseSyntheticEvent) => setTitle(e.target.value);
+    const {store} = useContext(Context)
+
+    const onUpdate = (task: ITask) => {
+        store.updateContent(task);
+    }
+
     const onSubmit = (e: BaseSyntheticEvent) => {
         e.preventDefault();
-        onUpdate({...item, title});
+        if (title.length) {
+            onUpdate({...item, title});
+        }
         onExit();
     }
     const onCancel = () => {
@@ -26,7 +33,7 @@ const TodoItemEdit: React.FunctionComponent<IProps> = ({item, onUpdate, onExit})
     }
 
     const handleKeyPress = ({key}: {key:string}) => {
-        if (key === 'Enter') {
+        if (key === 'Enter' && title.length) {
             onUpdate({...item, title});
             onExit();
         } else if (key === 'Escape') {
@@ -57,4 +64,4 @@ const TodoItemEdit: React.FunctionComponent<IProps> = ({item, onUpdate, onExit})
     )
 }
 
-export default TodoItemEdit
+export default observer(TodoItemEdit)

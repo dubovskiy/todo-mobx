@@ -36,6 +36,15 @@
   cursor: pointer
 }
 
+.pending{
+  background-color: #f5f5f5;
+  cursor: not-allowed;
+}
+
+.pending > div{
+  pointer-events: none;
+}
+
 svg.link-item{
   margin-left: 0.4em;
 }
