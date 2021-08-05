@@ -41,6 +41,10 @@ class Todo {
         }
     }
 
+    getOldTitle(id: number) {
+        return this.todoListHelper[id]?.oldTitle;
+    }
+
     removeOldTitle(id: number) {
         delete this.todoListHelper[id]?.oldTitle;
     }
@@ -67,10 +71,10 @@ class Todo {
 
         TodoController
             .createTodo(todoItem)
-            .catch(() => {
-                this.removeItem(id);
-                console.log('error');
-            }).finally(() => {
+            .then(({success}) => {
+                if (!success) {
+                    this.removeItem(id);
+                }
                 this.setPending(id, false);
             })
     }
@@ -85,24 +89,22 @@ class Todo {
 
             TodoController
                 .updateTodo(task)
-                .then(() => {
+                .then(({success}) => {
                     this.setPending(id, false);
-                    if (withUndo) {
-                        return new Promise((res) => {
-                            this.saveTimeout(id, setTimeout(res, 5000));
-                        })
+
+                    if (success && withUndo) {
+                        const to = setTimeout(() => {
+                            this.removeTimeout(id);
+                            this.removeOldTitle(id);
+                        }, 5000);
+                        this.saveTimeout(id, to);
+                    } else if (!success) {
+                        const oldTitle = this.getOldTitle(id);
+                        if (oldTitle) {
+                            task.title = oldTitle;
+                        }
+                        console.log('error');
                     }
-                })
-                .catch(() => {
-                    this.setPending(id, false);
-                    const oldTitle = this.todoFullList[id]?.oldTitle;
-                    if (oldTitle) {
-                        task.title = oldTitle;
-                    }
-                    console.log('error');
-                }).finally(() => {
-                    this.removeTimeout(id);
-                    this.removeOldTitle(id);
                 });
         }
     }
@@ -115,10 +117,11 @@ class Todo {
 
             TodoController
                 .updateTodo(task)
-                .catch(() => {
-                    task.done = !task.done;
-                    console.log('error');
-                }).finally(() => {
+                .then(({success}) => {
+                    if (!success) {
+                        task.done = !task.done;
+                        console.log('error');
+                    }
                     this.setPending(id, false);
                 });
         }
@@ -141,11 +144,13 @@ class Todo {
 
         TodoController
             .removeTodo(id)
-            .then(() => {
-                this.removeItem(id);
-            }).catch(() => {
+            .then(({success}) => {
+                if (success) {
+                    this.removeItem(id);
+                } else {
+
+                }
                 console.log('error');
-            }).finally(() => {
                 this.setPending(id, false);
             })
     }
